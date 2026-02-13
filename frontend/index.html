@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <title>Caça-Palavras | Word Hunt</title>
+  </head>
+  <body>
+    <div class="theme-toggle">
+      <button id="toggle-theme" aria-label="Alternar modo escuro">
+        ☀️
+      </button>
+    </div>
+
+    <h1>🧩 Caça-Palavras</h1>
+
+    <div class="top-bar">
+      <div class="controls">
+        <button id="init-game" aria-label="Iniciar jogo">
+          ▶️ Iniciar
+        </button>
+        <button id="new-game" aria-label="Novo jogo">
+          ▶️ Novo Jogo
+        </button>
+        <button id="restart-game" aria-label="Reiniciar jogo">
+          🔄 Reiniciar
+        </button>
+        <button id="timer" aria-label="Cronômetro">
+          ⏱️ 00:00 
+        </button>
+      </div>
+    </div>
+
+    <div id="container">
+      <section class="word-container" aria-label="Lista de palavras">
+        <div id="word-table" ></div>
+      </section>
+
+      <section class="game-board-container" aria-label="Tabuleiro do jogo">
+        <div id="game-board" role="grid"></div>
+      </section>
+    </div>
+
+    <script src="assets/scripts/game.js" defer></script>
+  </body>
+</html>
