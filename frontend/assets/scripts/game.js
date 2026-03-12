@@ -2,9 +2,8 @@ const wcontainer = document.getElementsByClassName('word-container');
 const gcontainer = document.getElementsByClassName('game-board-container');
 const boardEl = document.getElementById('game-board');
 const listEl = document.getElementById('list');
-const restartBtn = document.getElementById("restart-game");
-const timerBtn = document.getElementById("timer");
 const themeBtn = document.getElementById("toggle-theme");
+const timerBtn = document.getElementById("timer");
 const initGameBtn = document.getElementById("init-game");
 const newGameBtn = document.getElementById("new-game");
 
@@ -12,18 +11,12 @@ let isDragging = false, startIdx = null, cells = [], targetWords = [];
 let timerInterval;
 let seconds = 0;
 
-restartBtn.hidden = true; // Hide restart button until the game starts
-timerBtn.hidden   = true; // Hide timer until the game starts
-newGameBtn.hidden = true; // Hide new game button until the game starts
-wcontainer[0].hidden = true; // Show the initial word container (start screen)
-gcontainer[0].hidden = true; // Show the initial game board container (start screen)
-
 async function initGame() {
-    const res = await fetch('http://localhost:5000/generate');
+    const res = await fetch('http://127.0.0.1:5000/generate');
     const data = await res.json();
     targetWords = data.words;
-    
-    boardEl.style.gridTemplateColumns = `repeat(20, 40px)`;
+
+    boardEl.style.gridTemplateColumns = `repeat(40, 30px)`;
         data.board.flat().forEach((letter, i) => {
             const div = document.createElement('div');
             div.className = 'cell';
@@ -36,8 +29,19 @@ async function initGame() {
     renderWordTable(targetWords.sort((a, b) => a.localeCompare(b)));
 }
 
+function getRandomColor() {
+  const letters = '0123456789ABCDEF';
+  let color = '#';
+
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+
+  return color;
+}
+
 function highlightLine(start, end) {
-    const size = 20;
+    const size = 40;
     const x1 = start % size, y1 = Math.floor(start / size);
     const x2 = end % size, y2 = Math.floor(end / size);
     const dx = x2 - x1, dy = y2 - y1;
@@ -54,38 +58,66 @@ function highlightLine(start, end) {
 }
 
 function checkSelection() {
-    const selected = Array.from(document.querySelectorAll('.selecting'));
-    if (selected.length === 0) return; // Safety check
+  const randomColor = getRandomColor(); // generate color for this word
+  const selected = Array.from(document.querySelectorAll('.selecting'));
 
-    const word = selected.map(c => c.textContent).join('').toUpperCase();
-    const reversedWord = word.split('').reverse().join('').toUpperCase();
+  if (selected.length === 0) return; // Safety check
 
-    // 1. Check if either version exists in the targetWords array
-    const finalWord = targetWords.find(w => w.toUpperCase() === word || w.toUpperCase() === reversedWord);
+  const word = selected.map(c => c.textContent).join('').toUpperCase();
+  const reversedWord = word.split('').reverse().join('').toUpperCase();
 
-    if (finalWord) {
-        // 2. Mark cells as found
-        selected.forEach(c => { 
-            c.classList.replace('selecting', 'found'); 
-        });
+  // 1. Check if either version exists in the targetWords array
+  const finalWord = targetWords.find(w => w.toUpperCase() === word || w.toUpperCase() === reversedWord);
 
-        // 3. Mark word in the side table (The "Fix")
-        // We use lowerCase and trim to ensure the ID matches your renderWordTable function
-        const wordElement = document.getElementById(`word-${finalWord.toLowerCase().trim()}`);
-        
-        if (wordElement) {
-            wordElement.classList.add('found');
-        }
-    } else {
-        // No match? Just clean up the selection
-        selected.forEach(c => c.classList.remove('selecting'));
-    }
+  if (finalWord) {
+      // 2. Mark cells as found
+      selected.forEach(c => {
+          c.classList.replace('selecting', 'found');
+          c.style.backgroundColor = randomColor; // apply color
+          c.style.borderColor = randomColor; // optional: match border color to background
+      });
+
+      // 3. Mark word in the side table (The "Fix")
+      // We use lowerCase and trim to ensure the ID matches your renderWordTable function
+      const wordElement = document.getElementById(`word-${finalWord.toLowerCase().trim()}`);
+
+      if (wordElement) {
+          wordElement.classList.add('found');
+          wordElement.style.color = randomColor; // optional: match the color
+      }
+
+  } else {
+      // No match? Just clean up the selection
+      selected.forEach(c => c.classList.remove('selecting'));
+  }
+
+  // 4. Optional: Check for game completion here if needed
+  const allWordsFound = Array.from(document.querySelectorAll('.word-item')).every(el => el.classList.contains('found'));
+  if (allWordsFound) {
+    stopTimer();
+    Swal.fire({
+      title: 'Parabéns!',
+      theme: 'auto',
+      html: `Você encontrou todas as palavras em <b>${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}</b>.`,
+      iconHtml: '<img width="48" height="48" src="assets/images/trophy_icon.png" alt="prize"/>',
+      icon: 'success',
+      confirmButtonText: 'Jogar Novamente',
+      showCloseButton: true,
+      customClass: {
+        icon: 'no-border' // A custom CSS class to remove the default border
+      }
+    }).then(() => {
+      // Reset the game when they click "Jogar Novamente"
+      newGameBtn.click();
+    });
+  }
+
 }
 
 function renderWordTable(targetWords) {
   const tableEl = document.getElementById('word-table');
   if (!tableEl) return;
-  
+
   tableEl.innerHTML = ''; // Clear existing content
 
   // We use a DocumentFragment to minimize browser reflows (better performance)
@@ -95,9 +127,9 @@ function renderWordTable(targetWords) {
     const wordDiv = document.createElement('div');
     wordDiv.className = 'word-item';
     // Ensure the ID handles spaces or special characters if necessary
-    wordDiv.id = `word-${word.toLowerCase()}`; 
+    wordDiv.id = `word-${word.toLowerCase()}`;
     wordDiv.textContent = word.toUpperCase(); // Better for word searches
-    
+
     fragment.appendChild(wordDiv);
   });
 
@@ -109,13 +141,12 @@ function startTimer() {
     seconds++;
     const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
     const secs = String(seconds % 60).padStart(2, '0');
-    timerBtn.textContent = `⏱️ ${mins}:${secs}`;
+    timerBtn.innerHTML = `<img src="assets/images/clock_icon.png" alt="Icon" width="24" height="24">&nbsp;&nbsp;${mins}:${secs}`;
   }, 1000);
 }
 
 function stopTimer() {
   clearInterval(timerInterval);
-  timerBtn.textContent = "⏱️ 00:00";
 }
 
 boardEl.addEventListener('mousedown', e => {
@@ -136,12 +167,17 @@ window.addEventListener('mouseup', () => {
     checkSelection();
 });
 
+// keep session unless closed or clicking new game.
+window.addEventListener("beforeunload", function (event) {
+  event.preventDefault();
+});
+
 themeBtn.addEventListener("click", () => {
   // We toggle 'light-theme' because the CSS is dark by default
   const isLight = document.body.classList.toggle("light-theme");
   // Update button text based on the NEW state
-  themeBtn.textContent = isLight 
-    ? "🌙" 
+  themeBtn.textContent = isLight
+    ? "🌙"
     : "☀️";
 });
 
@@ -155,53 +191,59 @@ timerBtn.addEventListener('click', () => {
   }
 });
 
-restartBtn.addEventListener("click", () => {
-  // Clear board & words
-  stopTimer();
-  seconds = 0; // Reset seconds for a fresh start
-
-  document.getElementById("game-board").innerHTML = "";
-  document.getElementById("word-table").innerHTML = "";
-
-  // Call your existing game init function
-  if (typeof initGame === "function") {
-    initGame();
-    startTimer(); // Restart the clock immediately for a fresh game
-  } else {
-    location.reload(); // fallback
-  }
-});
-
 initGameBtn.addEventListener("click", () => {
 
-  restartBtn.hidden = false; // Show restart button once the game starts
-  timerBtn.hidden = false; // Show timer once the game starts
-  newGameBtn.hidden = false; // Show new game button once the game starts
-  wcontainer[0].hidden = false; // Show the word container
-  gcontainer[0].hidden = false; // Show the game board container
+  timerBtn.classList.remove("hidden");
+  newGameBtn.classList.remove("hidden");
+  wcontainer[0].classList.remove("hidden")
+  gcontainer[0].classList.remove("hidden")
+
+  initGameBtn.classList.add("hidden");
 
   // 3. Initialize the game logic
   if (typeof initGame === "function") {
     initGame();
     startTimer(); // Start the clock only when they actually play
-    initGameBtn.hidden = true; // Hide the start button after starting
   }
+
 }
 );
 
 newGameBtn.addEventListener("click", () => {
-  // Clear board & words
-  stopTimer();
-  seconds = 0; // Reset seconds for a fresh start
 
-  document.getElementById("game-board").innerHTML = "";
-  document.getElementById("word-table").innerHTML = "";
+  Swal.fire({
+      title: 'Novo Jogo',
+      theme: 'auto',
+      html: `Tem certeza que deseja iniciar um novo jogo? Seu progresso atual será perdido.`,
+      // iconHtml: '<img width="48" height="48" src="assets/images/question_icon_01.png" alt="question"/>',
+      icon: 'question',
+      confirmButtonText: 'Iniciar Novo Jogo',
+      cancelButtonText: 'Cancelar',
+      showCancelButton: true,
+      customClass: {
+        icon: 'no-border' // A custom CSS class to remove the default border
+    }
+  }).then((result) => {
 
-  // Call your existing game init function
-  if (typeof initGame === "function") {
-    initGame();
-    startTimer(); // Restart the clock immediately for a fresh game
-  } else {
-    location.reload(); // fallback
-  }
+    if (!result.isConfirmed) return; // If they cancel, do nothing
+
+    // Stop timer
+    stopTimer();
+    seconds = 0;
+    timerBtn.innerHTML = `<img src="assets/images/clock_icon.png" alt="Icon" width="24" height="24">&nbsp;&nbsp;00:00`;
+
+    // Clear board & words
+    boardEl.innerHTML = "";
+    cells = [];
+    targetWords = [];
+    startIdx = null;
+
+    // Reset word list
+    document.getElementById("word-table").innerHTML = "";
+
+    // Start new game
+    initGameBtn.click();
+
+  });
+
 });

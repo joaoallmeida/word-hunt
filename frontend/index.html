@@ -3,8 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="assets/css/style.css" />
     <title>Caça-Palavras | Word Hunt</title>
+    <link rel="icon" href="assets/images/puzzle_icon.png" type="image/png" />
+    <link rel="stylesheet" href="assets/css/style.css" />
   </head>
   <body>
     <div class="theme-toggle">
@@ -13,35 +14,35 @@
       </button>
     </div>
 
-    <h1>🧩 Caça-Palavras</h1>
+    <div class="container">
 
-    <div class="top-bar">
-      <div class="controls">
-        <button id="init-game" aria-label="Iniciar jogo">
-          ▶️ Iniciar
-        </button>
-        <button id="new-game" aria-label="Novo jogo">
-          ▶️ Novo Jogo
-        </button>
-        <button id="restart-game" aria-label="Reiniciar jogo">
-          🔄 Reiniciar
-        </button>
-        <button id="timer" aria-label="Cronômetro">
-          ⏱️ 00:00 
-        </button>
+      <div class="top-bar">
+        <div class="title">
+          <h1>🧩 Caça-Palavras</h1>
+        </div>
+        <div class="controls">
+          <button id="init-game" class="flex-center" aria-label="Iniciar jogo">
+            <img src="assets/images/play_icon.png" alt="Icon" width="24" height="24">&nbsp;&nbsp;Iniciar
+          </button>
+          <button id="new-game" class="flex-center hidden" aria-label="Novo jogo">
+            <img src="assets/images/plus_icon.png" alt="Icon" width="24" height="24">&nbsp;&nbsp;Novo Jogo
+          </button>
+          <button id="timer" class="flex-center hidden" aria-label="Cronômetro">
+            <img src="assets/images/clock_icon.png" alt="Icon" width="24" height="24">&nbsp;&nbsp;00:00
+          </button>
+        </div>
+      </div>
+
+      <div class="word-container hidden" aria-label="Lista de palavras">
+        <div id="word-table" ></div>
+      </div>
+
+      <div class="game-board-container hidden" aria-label="Tabuleiro do jogo">
+        <div id="game-board" role="grid"></div>
       </div>
     </div>
 
-    <div id="container">
-      <section class="word-container" aria-label="Lista de palavras">
-        <div id="word-table" ></div>
-      </section>
-
-      <section class="game-board-container" aria-label="Tabuleiro do jogo">
-        <div id="game-board" role="grid"></div>
-      </section>
-    </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="assets/scripts/game.js" defer></script>
   </body>
 </html>

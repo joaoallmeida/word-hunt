@@ -6,7 +6,7 @@
   --border: #333;
   --cell-border: #444;
   --shadow: rgba(0, 0, 0, 0.5);
-  
+
   /* Selection Colors */
   --color-selecting: #ffd54f; /* Gold/Yellow */
   --color-found: #4caf50;     /* Green */
@@ -41,7 +41,7 @@ body {
 /* ---------- WORD LIST & TABLE ---------- */
 .container {
   width: 100%;
-  max-width: 800px;
+  /* max-width: 800px; */
   text-align: center;
   display: grid;
   justify-content: center;
@@ -56,24 +56,23 @@ body {
 .word-container {
   width: 100%;
   margin: 20px 0 20px 0;
-  text-align: left;
 }
 
 #word-table {
   display: grid;
   /* Creates exactly 7 equal columns */
-  grid-template-columns: repeat(7, 1fr); 
+  grid-template-columns: repeat(7, 1fr);
   gap: 10px;
   background: var(--card);
   padding: 20px;
   border-radius: 8px;
   border: 1px solid var(--border);
+  justify-items: center;
 }
 
 .word-item {
   font-size: 0.95rem;
   font-weight: 550;
-  text-align: left;
   padding: 5px;
   color: var(--text);
   border-bottom: 2px solid transparent;
@@ -87,32 +86,56 @@ body {
   opacity: 0.5;
 }
 
+.controls {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+  margin: 10px 0;
+}
+
+.top-bar {
+  display: grid;
+  justify-content: center;
+  align-items: center;
+}
+
+.title {
+  margin-top: 10px;
+}
+
 /* ---------- GAME BOARD ---------- */
 #game-board {
   display: grid;
-  gap: 5px;
+  gap: 8px;
   background: var(--card);
-  padding: 12px;
-  margin-bottom: 20px;
+  padding: 15px;
+  margin-bottom: 25px;
   border-radius: 8px;
   box-shadow: 0 4px 10px var(--shadow);
   user-select: none;
   cursor: crosshair;
+  justify-items: center;
+}
+
+.game-board-container {
+  margin: 0;
 }
 
 /* ---------- CELLS ---------- */
 .cell {
   width: 32px;
   height: 32px;
-  border: 1px solid var(--cell-border);
+  border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
   font-size: 1rem;
   transition: 0.1s;
-  background: var(--card);
+  background: var(--cell-border);
   color: var(--text);
+  transition: background-color 0.3s ease;
 }
 
 /* SELECTION STATES */
@@ -122,9 +145,7 @@ body {
 }
 
 .cell.found {
-  background-color: var(--color-found);
   color: var(--color-found-text);
-  border-color: var(--color-found);
 }
 
 .word-item.found {
@@ -150,9 +171,16 @@ button:hover {
   transform: translateY(-1px);
 }
 
+.flex-center {
+  display: flex;
+  align-items: center;
+}
+
+.hidden {
+  display: none;
+}
+
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 768px) {
-  #game-board {
-    transform: scale(0.8); /* Less aggressive scale */
-  }
-} 
+
+}

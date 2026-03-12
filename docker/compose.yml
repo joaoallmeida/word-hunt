@@ -1,0 +1,14 @@
+name: WordHunt
+
+services:
+  wordhunt:
+    container_name: wordhunt
+    image: wordhunt:latest
+    ports:
+      - "5000:5000"
+    networks:
+      - wordhunt-network
+
+networks:
+  wordhunt-network:
+    driver: bridge
