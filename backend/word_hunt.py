@@ -76,8 +76,9 @@ class WordHunt:
 
         self.fill_empty(grid)
 
-        return grid, words
+        return grid, sorted(words)
 
 # if __name__ == "__main__":
 #     wh = WordHunt()
-#     wh.run()
+#     grid , words = wh.run()
+#     print(f"Words to find: {words}")

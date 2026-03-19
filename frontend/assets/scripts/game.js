@@ -1,18 +1,18 @@
-const wcontainer = document.getElementsByClassName('word-container');
-const gcontainer = document.getElementsByClassName('game-board-container');
-const boardEl = document.getElementById('game-board');
-const listEl = document.getElementById('list');
-const themeBtn = document.getElementById("toggle-theme");
-const timerBtn = document.getElementById("timer");
+const wcontainer  = document.getElementsByClassName('word-container');
+const gcontainer  = document.getElementsByClassName('game-board-container');
+const boardEl     = document.getElementById('game-board');
+const listEl      = document.getElementById('list');
+const themeBtn    = document.getElementById("toggle-theme");
+const timerBtn    = document.getElementById("timer");
 const initGameBtn = document.getElementById("init-game");
-const newGameBtn = document.getElementById("new-game");
+const newGameBtn  = document.getElementById("new-game");
 
 let isDragging = false, startIdx = null, cells = [], targetWords = [];
 let timerInterval;
 let seconds = 0;
 
 async function initGame() {
-    const res = await fetch('http://127.0.0.1:5000/generate');
+    const res = await fetch('http://192.168.15.6:5000/generate');
     const data = await res.json();
     targetWords = data.words;
 
@@ -59,6 +59,7 @@ function highlightLine(start, end) {
 
 function checkSelection() {
   const randomColor = getRandomColor(); // generate color for this word
+  console.log('Random Color:', randomColor); // Debug log
   const selected = Array.from(document.querySelectorAll('.selecting'));
 
   if (selected.length === 0) return; // Safety check
@@ -114,26 +115,26 @@ function checkSelection() {
 
 }
 
-function renderWordTable(targetWords) {
+function renderWordTable(targetWords, columns = 4) {
   const tableEl = document.getElementById('word-table');
   if (!tableEl) return;
 
-  tableEl.innerHTML = ''; // Clear existing content
+  tableEl.innerHTML = '';
 
-  // We use a DocumentFragment to minimize browser reflows (better performance)
-  const fragment = document.createDocumentFragment();
+  for (let i = 0; i < targetWords.length; i += columns) {
+    const row = document.createElement('div');
+    row.className = 'word-row';
 
-  targetWords.forEach(word => {
-    const wordDiv = document.createElement('div');
-    wordDiv.className = 'word-item';
-    // Ensure the ID handles spaces or special characters if necessary
-    wordDiv.id = `word-${word.toLowerCase()}`;
-    wordDiv.textContent = word.toUpperCase(); // Better for word searches
+    targetWords.slice(i, i + columns).forEach(word => {
+      const cell = document.createElement('div');
+      cell.className = 'word-item';
+      cell.id = `word-${word.toLowerCase()}`;
+      cell.textContent = word.toUpperCase();
+      row.appendChild(cell);
+    });
 
-    fragment.appendChild(wordDiv);
-  });
-
-  tableEl.appendChild(fragment);
+    tableEl.appendChild(row);
+  }
 }
 
 function startTimer() {

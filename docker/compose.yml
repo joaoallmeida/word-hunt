@@ -8,7 +8,8 @@ services:
       - "5000:5000"
     networks:
       - wordhunt-network
-
+    restart: unless-stopped
+    
 networks:
   wordhunt-network:
     driver: bridge
