@@ -8,8 +8,8 @@ CORS(app) # Allows the frontend to talk to the backend
 
 @app.route('/generate', methods=['GET'])
 def generate():
-    grid, words = wr.run()
-    return jsonify({"board": grid, "words": words})
+    grid, words, hints = wr.run()
+    return jsonify({"board": grid, "words": words, "hints": hints})
 
 @app.route('/wordhunt', methods=['GET'])
 def index():
@@ -18,7 +18,3 @@ def index():
 @app.route('/', methods=['GET'])
 def root():
     return redirect('/wordhunt')
-
-# if __name__ == '__main__':
-#     # debug = False if os.getenv('FLASK_ENV') == 'development' else True
-#     app.run(port=5000, debug=True)

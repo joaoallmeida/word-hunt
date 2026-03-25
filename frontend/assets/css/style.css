@@ -7,10 +7,14 @@
   --cell-border: #444;
   --shadow: rgba(0, 0, 0, 0.5);
 
+  --cell-size: 30px;
+  --board-gap: 8px;
+  --cell-font-size: 1rem;
+
   /* Selection Colors */
   --color-selecting: #ffd54f; /* Gold/Yellow */
   --color-found: #4caf50;     /* Green */
-  --color-found-text: #ffffff;
+  --color-found-text: #222;
   --color-disabled: #666;
 }
 
@@ -60,8 +64,7 @@ body {
 
 #word-table {
   display: grid;
-  /* Creates exactly 7 equal columns */
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   gap: 10px;
   background: var(--card);
   padding: 20px;
@@ -107,7 +110,7 @@ body {
 /* ---------- GAME BOARD ---------- */
 #game-board {
   display: grid;
-  gap: 8px;
+  gap: var(--board-gap);
   background: var(--card);
   padding: 15px;
   margin-bottom: 25px;
@@ -116,22 +119,26 @@ body {
   user-select: none;
   cursor: crosshair;
   justify-items: center;
+  touch-action: none;
 }
 
 .game-board-container {
   margin: 0;
+  max-width: 100vw;
+  overflow: auto;
+  padding-bottom: 20px;
 }
 
 /* ---------- CELLS ---------- */
 .cell {
-  width: 32px;
-  height: 32px;
+  width: var(--cell-size);
+  height: var(--cell-size);
   border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  font-size: 1rem;
+  font-size: var(--cell-font-size);
   transition: 0.1s;
   background: var(--cell-border);
   color: var(--text);
@@ -146,6 +153,12 @@ body {
 
 .cell.found {
   color: var(--color-found-text);
+}
+
+.cell.hint {
+  background-color: rgba(255, 213, 79, 0.3);
+  box-shadow: inset 0 0 0 2px var(--color-selecting);
+  color: var(--text);
 }
 
 .word-item.found {
@@ -174,6 +187,7 @@ button:hover {
 .flex-center {
   display: flex;
   align-items: center;
+  margin: 10px;
 }
 
 .hidden {
@@ -181,6 +195,46 @@ button:hover {
 }
 
 /* ---------- RESPONSIVE ---------- */
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
+  :root {
+    --cell-size: 24px;
+    --board-gap: 4px;
+    --cell-font-size: 0.85rem;
+  }
+}
 
+@media (max-width: 768px) {
+  :root {
+    --cell-size: 18px;
+    --board-gap: 3px;
+    --cell-font-size: 0.75rem;
+  }
+  
+  .controls {
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+  }
+  
+  .title h1 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --cell-size: 16px;
+    --board-gap: 2px;
+    --cell-font-size: 0.65rem;
+  }
+
+  .controls button {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+  }
+  
+  #word-table {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    padding: 12px;
+  }
 }

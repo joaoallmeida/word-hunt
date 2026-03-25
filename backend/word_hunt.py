@@ -39,8 +39,8 @@ class WordHunt:
             if self.can_place_word(grid, word, row, col, dr, dc):
                 for i, char in enumerate(word):
                     grid[row + dr * i][col + dc * i] = char
-                return True
-        return False
+                return (row, col)
+        return None
 
     def fill_empty(self, grid):
         for r in range(len(grid)):
@@ -48,10 +48,6 @@ class WordHunt:
                 if grid[r][c] == "":
                     grid[r][c] = random.choice(string.ascii_uppercase)
         return grid
-
-    def print_grid(self, grid):
-        for row in grid:
-            print(" ".join(row))
 
     def random_words(self):
         generic = Generic(Locale.PT_BR)
@@ -69,16 +65,20 @@ class WordHunt:
         words = self.random_words()
         grid = self.create_grid(self.ROWS, self.COLS)
 
+        hints = []
+
         for word in words:
-            placed = self.place_word(grid, word)
-        if not placed:
-            print(f"Could not place word: {word}")
+            placed_at = self.place_word(grid, word)
+            if placed_at:
+                hints.append({
+                    "word": word,
+                    "row": placed_at[0],
+                    "col": placed_at[1],
+                    "index": placed_at[0] * self.COLS + placed_at[1]
+                })
+            else:
+                print(f"Could not place word: {word}")
 
         self.fill_empty(grid)
 
-        return grid, sorted(words)
-
-# if __name__ == "__main__":
-#     wh = WordHunt()
-#     grid , words = wh.run()
-#     print(f"Words to find: {words}")
+        return grid, sorted(words), hints

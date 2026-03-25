@@ -6,17 +6,20 @@ const themeBtn    = document.getElementById("toggle-theme");
 const timerBtn    = document.getElementById("timer");
 const initGameBtn = document.getElementById("init-game");
 const newGameBtn  = document.getElementById("new-game");
+const hintBtn     = document.getElementById("hint-button");
 
 let isDragging = false, startIdx = null, cells = [], targetWords = [];
+let gameHints = [];
 let timerInterval;
 let seconds = 0;
 
 async function initGame() {
-    const res = await fetch('http://192.168.15.6:5000/generate');
+    const res = await fetch('http://0.0.0.0:5000/generate');
     const data = await res.json();
     targetWords = data.words;
+    gameHints = data.hints || [];
 
-    boardEl.style.gridTemplateColumns = `repeat(40, 30px)`;
+    boardEl.style.gridTemplateColumns = `repeat(40, var(--cell-size, 30px))`;
         data.board.flat().forEach((letter, i) => {
             const div = document.createElement('div');
             div.className = 'cell';
@@ -83,8 +86,9 @@ function checkSelection() {
       const wordElement = document.getElementById(`word-${finalWord.toLowerCase().trim()}`);
 
       if (wordElement) {
-          wordElement.classList.add('found');
-          wordElement.style.color = randomColor; // optional: match the color
+        wordElement.classList.add('found');
+        wordElement.style.color = randomColor; // optional: match the color
+        selected.forEach(c => c.classList.remove('hint'));
       }
 
   } else {
@@ -112,7 +116,6 @@ function checkSelection() {
       newGameBtn.click();
     });
   }
-
 }
 
 function renderWordTable(targetWords, columns = 4) {
@@ -126,12 +129,12 @@ function renderWordTable(targetWords, columns = 4) {
     row.className = 'word-row';
 
     targetWords.slice(i, i + columns).forEach(word => {
-      const cell = document.createElement('div');
-      cell.className = 'word-item';
-      cell.id = `word-${word.toLowerCase()}`;
-      cell.textContent = word.toUpperCase();
+    const cell = document.createElement('div');
+    cell.className = 'word-item';
+    cell.id = `word-${word.toLowerCase()}`;
+    cell.textContent = word.toUpperCase();
       row.appendChild(cell);
-    });
+  });
 
     tableEl.appendChild(row);
   }
@@ -150,19 +153,22 @@ function stopTimer() {
   clearInterval(timerInterval);
 }
 
-boardEl.addEventListener('mousedown', e => {
+boardEl.addEventListener('pointerdown', e => {
     if (!e.target.dataset.index) return;
+    e.target.releasePointerCapture(e.pointerId);
     isDragging = true;
     startIdx = parseInt(e.target.dataset.index);
 });
 
-window.addEventListener('mousemove', e => {
-    if (!isDragging || !e.target.dataset?.index) return;
-    const endIdx = parseInt(e.target.dataset.index);
+window.addEventListener('pointermove', e => {
+    if (!isDragging) return;
+    const target = document.elementFromPoint(e.clientX, e.clientY);
+    if (!target || !target.dataset || !target.dataset.index) return;
+    const endIdx = parseInt(target.dataset.index);
     highlightLine(startIdx, endIdx);
 });
 
-window.addEventListener('mouseup', () => {
+window.addEventListener('pointerup', () => {
     if (!isDragging) return;
     isDragging = false;
     checkSelection();
@@ -196,6 +202,7 @@ initGameBtn.addEventListener("click", () => {
 
   timerBtn.classList.remove("hidden");
   newGameBtn.classList.remove("hidden");
+  hintBtn.classList.remove("hidden");
   wcontainer[0].classList.remove("hidden")
   gcontainer[0].classList.remove("hidden")
 
@@ -209,6 +216,17 @@ initGameBtn.addEventListener("click", () => {
 
 }
 );
+
+hintBtn.addEventListener("click", () => {
+  for (let i = 0; i < gameHints.length; i++) {
+    const hint = gameHints[i];
+    const cell = cells[hint.index];
+    if (cell && !cell.classList.contains('found') && !cell.classList.contains('hint')) {
+      cell.classList.add('hint');
+      break;
+    }
+  }
+});
 
 newGameBtn.addEventListener("click", () => {
 
@@ -237,6 +255,7 @@ newGameBtn.addEventListener("click", () => {
     boardEl.innerHTML = "";
     cells = [];
     targetWords = [];
+    gameHints = [];
     startIdx = null;
 
     // Reset word list
