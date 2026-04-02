@@ -2,6 +2,10 @@
 
 Welcome to the **Word Hunt** project! This is a fun and interactive word search puzzle game built with a web frontend (HTML/CSS/JS) and a Python (Flask) backend.
 
+## 🎥 Demo
+
+![Word Hunt Demo](frontend/assets/videos/demo.gif)
+
 ## 🌟 What is this project?
 
 The project generates a dynamic Word Hunt board where players must find a list of hidden words. The game includes:
