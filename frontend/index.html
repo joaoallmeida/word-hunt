@@ -9,39 +9,75 @@
   </head>
   <body>
     <div class="theme-toggle">
-      <button id="toggle-theme" aria-label="Alternar modo escuro">
+      <button id="toggle-theme" aria-label="Alternar modo escuro/claro">
         ☀️
       </button>
     </div>
 
     <div class="container">
-
-      <div class="top-bar">
-        <div class="title">
-          <h1>🧩 Caça-Palavras</h1>
+      <!-- Start Page Card -->
+      <div id="start-screen" class="start-card">
+        <div class="start-logo">
+          <h1 class="start-title">🧩 Caça-Palavras</h1>
+          <p class="start-subtitle">Desafie sua mente, encontre as palavras escondidas</p>
         </div>
-        <div class="controls">
-          <button id="init-game" class="flex-center" aria-label="Iniciar jogo">
-            <img src="assets/images/play_icon.png" alt="Icon" width="24" height="24">&nbsp;&nbsp;Iniciar
+        <div class="start-actions">
+          <button id="init-game" class="btn btn-primary btn-lg flex-center" aria-label="Iniciar jogo">
+            <img src="assets/images/play_icon.png" alt="Icon" width="28" height="28">
+            <span>Jogar Agora</span>
           </button>
-          <button id="new-game" class="flex-center hidden" aria-label="Novo jogo">
-            <img src="assets/images/plus_icon.png" alt="Icon" width="24" height="24">&nbsp;&nbsp;Novo Jogo
-          </button>
-          <button id="hint-button" class="flex-center hidden" aria-label="Dica">
-            <img src="assets/images/hint_icon.png" alt="Icon" width="24" height="24">&nbsp;&nbsp;Dica
-          </button>
-          <button id="timer" class="flex-center hidden" aria-label="Cronômetro">
-            <img src="assets/images/clock_icon.png" alt="Icon" width="24" height="24">&nbsp;&nbsp;00:00
+          <button id="start-instructions-btn" class="btn btn-secondary btn-lg flex-center" aria-label="Instruções">
+            <img src="assets/images/hint_icon.png" alt="Icon" width="28" height="28">
+            <span>Como Jogar</span>
           </button>
         </div>
       </div>
 
-      <div class="word-container hidden" aria-label="Lista de palavras">
-        <div id="word-table" ></div>
-      </div>
+      <!-- Game Screen (Hidden initially) -->
+      <div id="game-screen" class="hidden" style="width: 100%;">
+        <!-- Header/Navigation -->
+        <header class="header game-header">
+          <div class="header-content">
+            <div class="logo-section">
+              <h1 class="title">🧩 Caça-Palavras</h1>
+            </div>
+          </div>
+        </header>
 
-      <div class="game-board-container hidden" aria-label="Tabuleiro do jogo">
-        <div id="game-board" role="grid"></div>
+        <!-- Game Controls -->
+        <div class="top-bar">
+          <div class="controls">
+            <button id="instructions-button" class="btn btn-secondary flex-center" aria-label="Instruções">
+              <img src="assets/images/hint_icon.png" alt="Icon" width="24" height="24">
+              <span>Instruções</span>
+            </button>
+            <button id="new-game" class="btn btn-secondary flex-center" aria-label="Novo jogo">
+              <img src="assets/images/plus_icon.png" alt="Icon" width="24" height="24">
+              <span>Novo Jogo</span>
+            </button>
+            <button id="hint-button" class="btn btn-secondary flex-center" aria-label="Dica">
+              <img src="assets/images/hint_icon.png" alt="Icon" width="24" height="24">
+              <span>Dica</span>
+            </button>
+            <button id="timer" class="btn btn-timer flex-center" aria-label="Cronômetro">
+              <img src="assets/images/clock_icon.png" alt="Icon" width="24" height="24">
+              <span>00:00</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Word List -->
+        <div class="word-container" aria-label="Lista de palavras">
+          <div class="word-container-header">
+            <h2>Palavras Para Encontrar</h2>
+          </div>
+          <div id="word-table"></div>
+        </div>
+
+        <!-- Game Board -->
+        <div class="game-board-container" aria-label="Tabuleiro do jogo">
+          <div id="game-board" role="grid"></div>
+        </div>
       </div>
     </div>
 

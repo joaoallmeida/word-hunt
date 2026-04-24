@@ -7,6 +7,7 @@ const timerBtn    = document.getElementById("timer");
 const initGameBtn = document.getElementById("init-game");
 const newGameBtn  = document.getElementById("new-game");
 const hintBtn     = document.getElementById("hint-button");
+const instructionsBtn = document.getElementById("instructions-button");
 
 let isDragging = false, startIdx = null, cells = [], targetWords = [];
 let gameHints = [];
@@ -33,14 +34,9 @@ async function initGame() {
 }
 
 function getRandomColor() {
-  const letters = '0123456789ABCDEF';
-  let color = '#';
-
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-
-  return color;
+  // Generates a random hue, keeping high saturation and balanced lightness
+  const hue = Math.floor(Math.random() * 360);
+  return `hsl(${hue}, 80%, 60%)`; 
 }
 
 function highlightLine(start, end) {
@@ -62,7 +58,6 @@ function highlightLine(start, end) {
 
 function checkSelection() {
   const randomColor = getRandomColor(); // generate color for this word
-  console.log('Random Color:', randomColor); // Debug log
   const selected = Array.from(document.querySelectorAll('.selecting'));
 
   if (selected.length === 0) return; // Safety check
@@ -77,7 +72,7 @@ function checkSelection() {
       // 2. Mark cells as found
       selected.forEach(c => {
           c.classList.replace('selecting', 'found');
-          c.style.backgroundColor = randomColor; // apply color
+          c.style.background = `linear-gradient(135deg, ${randomColor} 0%, ${randomColor} 100%)`; // apply color
           c.style.borderColor = randomColor; // optional: match border color to background
       });
 
@@ -86,7 +81,7 @@ function checkSelection() {
       const wordElement = document.getElementById(`word-${finalWord.toLowerCase().trim()}`);
 
       if (wordElement) {
-        wordElement.classList.add('found');
+        wordElement.classList.add('found'); 
         wordElement.style.color = randomColor; // optional: match the color
         selected.forEach(c => c.classList.remove('hint'));
       }
@@ -200,13 +195,8 @@ timerBtn.addEventListener('click', () => {
 
 initGameBtn.addEventListener("click", () => {
 
-  timerBtn.classList.remove("hidden");
-  newGameBtn.classList.remove("hidden");
-  hintBtn.classList.remove("hidden");
-  wcontainer[0].classList.remove("hidden")
-  gcontainer[0].classList.remove("hidden")
-
-  initGameBtn.classList.add("hidden");
+  document.getElementById("start-screen").classList.add("hidden");
+  document.getElementById("game-screen").classList.remove("hidden");
 
   // 3. Initialize the game logic
   if (typeof initGame === "function") {
@@ -214,8 +204,7 @@ initGameBtn.addEventListener("click", () => {
     startTimer(); // Start the clock only when they actually play
   }
 
-}
-);
+});
 
 hintBtn.addEventListener("click", () => {
   for (let i = 0; i < gameHints.length; i++) {
@@ -227,6 +216,47 @@ hintBtn.addEventListener("click", () => {
     }
   }
 });
+
+const showInstructions = () => {
+  Swal.fire({
+    title: 'Como Jogar',
+    theme: 'auto',
+    html: `
+      <div style="text-align: left; font-size: 0.95rem;">
+        <h3 style="text-align: center; margin-bottom: 1rem;">Instruções do Caça-Palavras</h3>
+        <p><strong>🎯 Objetivo:</strong> Encontre todas as palavras escondidas no tabuleiro!</p>
+        <hr style="margin: 1rem 0;">
+        <p><strong>📋 Como Jogar:</strong></p>
+        <ul style="text-align: left;">
+          <li>Clique e arraste para selecionar letras no tabuleiro</li>
+          <li>As palavras podem estar em qualquer direção: horizontal, vertical ou diagonal</li>
+          <li>Você pode selecionar palavras para frente ou para trás</li>
+          <li>Quando encontrar uma palavra corretamente, ela será marcada como encontrada</li>
+        </ul>
+        <hr style="margin: 1rem 0;">
+        <p><strong>💡 Dicas:</strong></p>
+        <ul style="text-align: left;">
+          <li>Use o botão "Dica" para destacar uma letra de cada palavra</li>
+          <li>O cronômetro mostra quanto tempo você levou</li>
+          <li>Encontre todas as palavras para ganhar!</li>
+        </ul>
+        <hr style="margin: 1rem 0;">
+        <p><strong>✨ Boa Sorte!</strong></p>
+      </div>
+    `,
+    icon: 'info',
+    confirmButtonText: 'Entendido',
+    customClass: {
+      icon: 'no-border'
+    }
+  });
+};
+
+instructionsBtn.addEventListener("click", showInstructions);
+const startInstructionsBtn = document.getElementById("start-instructions-btn");
+if (startInstructionsBtn) {
+  startInstructionsBtn.addEventListener("click", showInstructions);
+}
 
 newGameBtn.addEventListener("click", () => {
 
