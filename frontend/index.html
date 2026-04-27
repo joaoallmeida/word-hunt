@@ -21,6 +21,33 @@
           <h1 class="start-title">🧩 Caça-Palavras</h1>
           <p class="start-subtitle">Desafie sua mente, encontre as palavras escondidas</p>
         </div>
+        <div class="best-time-container">
+          <p class="best-time-text">🏆 Melhor Tempo: <strong id="best-time-display">--:--</strong></p>
+        </div>
+        
+        <div class="start-settings">
+          <div class="start-settings-container">
+            <div class="setting-group">
+              <label for="difficulty-select" class="settings-label">Nível de Dificuldade:</label>
+              <select id="difficulty-select" class="form-select">
+                <option value="easy">Fácil</option>
+                <option value="medium" selected>Médio</option>
+                <option value="hard">Difícil</option>
+              </select>
+            </div>
+            <div class="setting-group">
+              <label for="theme-select" class="settings-label">Tema:</label>
+              <select id="theme-select" class="form-select">
+                <option value="random" selected>Aleatório</option>
+                <option value="animais">Animais</option>
+                <option value="paises">Países</option>
+                <option value="alimentos">Alimentos</option>
+                <option value="tecnologia">Tecnologia</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
         <div class="start-actions">
           <button id="init-game" class="btn btn-primary btn-lg flex-center" aria-label="Iniciar jogo">
             <img src="assets/images/play_icon.png" alt="Icon" width="28" height="28">
@@ -34,7 +61,7 @@
       </div>
 
       <!-- Game Screen (Hidden initially) -->
-      <div id="game-screen" class="hidden" style="width: 100%;">
+      <div id="game-screen" class="hidden game-screen-container">
         <!-- Header/Navigation -->
         <header class="header game-header">
           <div class="header-content">

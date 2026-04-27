@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, redirect, render_template
+from flask import Flask, jsonify, redirect, render_template, request
 from flask_cors import CORS
 from .word_hunt import WordHunt
 
@@ -8,8 +8,10 @@ CORS(app) # Allows the frontend to talk to the backend
 
 @app.route('/generate', methods=['GET'])
 def generate():
-    grid, words, hints = wr.run()
-    return jsonify({"board": grid, "words": words, "hints": hints})
+    difficulty = request.args.get('difficulty', 'medium')
+    theme = request.args.get('theme', 'random')
+    grid, words, hints, cols, rows = wr.run(difficulty, theme)
+    return jsonify({"board": grid, "words": words, "hints": hints, "width": cols, "height": rows})
 
 @app.route('/wordhunt', methods=['GET'])
 def index():

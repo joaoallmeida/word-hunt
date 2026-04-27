@@ -13,34 +13,50 @@ let isDragging = false, startIdx = null, cells = [], targetWords = [];
 let gameHints = [];
 let timerInterval;
 let seconds = 0;
+let currentDifficulty = 'medium';
+let currentTheme = 'random';
+let boardWidth = 40;
 
 async function initGame() {
-    const res = await fetch('http://0.0.0.0:5000/generate');
+    currentDifficulty = document.getElementById('difficulty-select').value;
+    currentTheme = document.getElementById('theme-select').value;
+    const res = await fetch(`/generate?difficulty=${currentDifficulty}&theme=${currentTheme}`);
     const data = await res.json();
     targetWords = data.words;
     gameHints = data.hints || [];
+    boardWidth = data.width || 40;
 
-    boardEl.style.gridTemplateColumns = `repeat(40, var(--cell-size, 30px))`;
-        data.board.flat().forEach((letter, i) => {
-            const div = document.createElement('div');
-            div.className = 'cell';
-            div.textContent = letter;
-            div.dataset.index = i;
-            boardEl.appendChild(div);
-            cells.push(div);
-        });
+    boardEl.style.gridTemplateColumns = `repeat(${boardWidth}, var(--cell-size, 30px))`;
+    data.board.flat().forEach((letter, i) => {
+        const div = document.createElement('div');
+        div.className = 'cell';
+        div.textContent = letter;
+        div.dataset.index = i;
+        boardEl.appendChild(div);
+        cells.push(div);
+    });
+
+    const wContainer = document.querySelector('.word-container');
+    requestAnimationFrame(() => {
+        wContainer.style.maxWidth = boardEl.offsetWidth + 'px';
+        wContainer.style.width = '100%';
+        wContainer.style.margin = '2rem auto';
+    });
 
     renderWordTable(targetWords.sort((a, b) => a.localeCompare(b)));
 }
 
 function getRandomColor() {
-  // Generates a random hue, keeping high saturation and balanced lightness
-  const hue = Math.floor(Math.random() * 360);
-  return `hsl(${hue}, 80%, 60%)`; 
+  // Use the golden angle to generate distinct hues sequentially
+  if (typeof getRandomColor.currentHue === 'undefined') {
+    getRandomColor.currentHue = Math.floor(Math.random() * 360);
+  }
+  getRandomColor.currentHue = (getRandomColor.currentHue + 137.5) % 360;
+  return `hsl(${Math.floor(getRandomColor.currentHue)}, 80%, 60%)`; 
 }
 
 function highlightLine(start, end) {
-    const size = 40;
+    const size = boardWidth;
     const x1 = start % size, y1 = Math.floor(start / size);
     const x2 = end % size, y2 = Math.floor(end / size);
     const dx = x2 - x1, dy = y2 - y1;
@@ -95,10 +111,25 @@ function checkSelection() {
   const allWordsFound = Array.from(document.querySelectorAll('.word-item')).every(el => el.classList.contains('found'));
   if (allWordsFound) {
     stopTimer();
+
+    // Local leaderboard logic
+    let bestTime = localStorage.getItem(`bestTime_${currentDifficulty}`);
+    let isNewBest = false;
+    if (!bestTime || seconds < parseInt(bestTime)) {
+        localStorage.setItem(`bestTime_${currentDifficulty}`, seconds);
+        isNewBest = true;
+        loadBestTime(); // update UI
+    }
+
+    let htmlMessage = `Você encontrou todas as palavras em <b>${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}</b>.`;
+    if (isNewBest) {
+        htmlMessage += `<br><br><b style="color: #28a745;">🎉 Novo Recorde! 🎉</b>`;
+    }
+
     Swal.fire({
       title: 'Parabéns!',
       theme: 'auto',
-      html: `Você encontrou todas as palavras em <b>${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}</b>.`,
+      html: htmlMessage,
       iconHtml: '<img width="48" height="48" src="assets/images/trophy_icon.png" alt="prize"/>',
       icon: 'success',
       confirmButtonText: 'Jogar Novamente',
@@ -113,26 +144,19 @@ function checkSelection() {
   }
 }
 
-function renderWordTable(targetWords, columns = 4) {
+function renderWordTable(targetWords) {
   const tableEl = document.getElementById('word-table');
   if (!tableEl) return;
 
   tableEl.innerHTML = '';
 
-  for (let i = 0; i < targetWords.length; i += columns) {
-    const row = document.createElement('div');
-    row.className = 'word-row';
-
-    targetWords.slice(i, i + columns).forEach(word => {
+  targetWords.forEach(word => {
     const cell = document.createElement('div');
     cell.className = 'word-item';
     cell.id = `word-${word.toLowerCase()}`;
     cell.textContent = word.toUpperCase();
-      row.appendChild(cell);
+    tableEl.appendChild(cell);
   });
-
-    tableEl.appendChild(row);
-  }
 }
 
 function startTimer() {
@@ -228,6 +252,7 @@ const showInstructions = () => {
         <hr style="margin: 1rem 0;">
         <p><strong>📋 Como Jogar:</strong></p>
         <ul style="text-align: left;">
+          <li>Escolha um <strong>Tema</strong> no menu inicial para jogar com palavras de uma categoria (Animais, Países, etc.) ou palavras aleatórias.</li>
           <li>Clique e arraste para selecionar letras no tabuleiro</li>
           <li>As palavras podem estar em qualquer direção: horizontal, vertical ou diagonal</li>
           <li>Você pode selecionar palavras para frente ou para trás</li>
@@ -237,7 +262,7 @@ const showInstructions = () => {
         <p><strong>💡 Dicas:</strong></p>
         <ul style="text-align: left;">
           <li>Use o botão "Dica" para destacar uma letra de cada palavra</li>
-          <li>O cronômetro mostra quanto tempo você levou</li>
+          <li>O cronômetro mostra quanto tempo você levou e, se quiser, pode pausar clicando nele</li>
           <li>Encontre todas as palavras para ganhar!</li>
         </ul>
         <hr style="margin: 1rem 0;">
@@ -263,18 +288,51 @@ newGameBtn.addEventListener("click", () => {
   Swal.fire({
       title: 'Novo Jogo',
       theme: 'auto',
-      html: `Tem certeza que deseja iniciar um novo jogo? Seu progresso atual será perdido.`,
-      // iconHtml: '<img width="48" height="48" src="assets/images/question_icon_01.png" alt="question"/>',
+        html: `
+        <p style="margin-bottom: 1.5rem; text-align: center;">Seu progresso atual será perdido. Escolha as configurações para o novo jogo:</p>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+            <div class="setting-group">
+                <label for="swal-difficulty" class="settings-label">Nível de Dificuldade:</label>
+                <select id="swal-difficulty" class="form-select">
+                  <option value="easy" ${currentDifficulty === 'easy' ? 'selected' : ''}>Fácil</option>
+                  <option value="medium" ${currentDifficulty === 'medium' ? 'selected' : ''}>Médio</option>
+                  <option value="hard" ${currentDifficulty === 'hard' ? 'selected' : ''}>Difícil</option>
+                </select>
+            </div>
+            <div class="setting-group">
+                <label for="swal-theme" class="settings-label">Tema:</label>
+                <select id="swal-theme" class="form-select">
+                  <option value="random" ${currentTheme === 'random' ? 'selected' : ''}>Aleatório</option>
+                  <option value="animais" ${currentTheme === 'animais' ? 'selected' : ''}>Animais</option>
+                  <option value="paises" ${currentTheme === 'paises' ? 'selected' : ''}>Países</option>
+                  <option value="alimentos" ${currentTheme === 'alimentos' ? 'selected' : ''}>Alimentos</option>
+                  <option value="tecnologia" ${currentTheme === 'tecnologia' ? 'selected' : ''}>Tecnologia</option>
+                </select>
+            </div>
+        </div>
+      `,
       icon: 'question',
       confirmButtonText: 'Iniciar Novo Jogo',
       cancelButtonText: 'Cancelar',
       showCancelButton: true,
       customClass: {
-        icon: 'no-border' // A custom CSS class to remove the default border
-    }
+        icon: 'no-border'
+      },
+      preConfirm: () => {
+        return {
+          difficulty: document.getElementById('swal-difficulty').value,
+          theme: document.getElementById('swal-theme').value
+        }
+      }
   }).then((result) => {
 
     if (!result.isConfirmed) return; // If they cancel, do nothing
+    
+    // Sync back to main selectors
+    const diffSelect = document.getElementById('difficulty-select');
+    if (diffSelect) diffSelect.value = result.value.difficulty;
+    const themeSelect = document.getElementById('theme-select');
+    if (themeSelect) themeSelect.value = result.value.theme;
 
     // Stop timer
     stopTimer();
@@ -297,3 +355,28 @@ newGameBtn.addEventListener("click", () => {
   });
 
 });
+
+// Load best time function
+function loadBestTime() {
+    const difficultySelect = document.getElementById('difficulty-select');
+    if (!difficultySelect) return;
+    const difficulty = difficultySelect.value;
+    const bestTime = localStorage.getItem(`bestTime_${difficulty}`);
+    const display = document.getElementById('best-time-display');
+    if (display) {
+        if (bestTime) {
+            const mins = String(Math.floor(bestTime / 60)).padStart(2, '0');
+            const secs = String(bestTime % 60).padStart(2, '0');
+            display.textContent = `${mins}:${secs}`;
+        } else {
+            display.textContent = '--:--';
+        }
+    }
+}
+
+const difficultySelectObj = document.getElementById('difficulty-select');
+if (difficultySelectObj) {
+    difficultySelectObj.addEventListener('change', loadBestTime);
+}
+document.addEventListener('DOMContentLoaded', loadBestTime);
+loadBestTime();
