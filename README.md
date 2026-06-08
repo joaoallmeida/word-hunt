@@ -4,7 +4,7 @@ Welcome to the **Word Hunt** project! This is a fun and interactive word search 
 
 ## 🎥 Demo
 
-![Word Hunt Demo](frontend/assets/videos/demo.gif)
+![Word Hunt Demo](frontend/assets/videos/demo.mp4)
 
 ## 🌟 What is this project?
 

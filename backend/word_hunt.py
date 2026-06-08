@@ -79,6 +79,10 @@ class WordHunt:
         return sorted(words)
 
     def run(self, difficulty='medium', theme='random'):
+        valid_difficulties = ['easy', 'medium', 'hard']
+        if difficulty not in valid_difficulties:
+            raise ValueError("Invalid difficulty level")
+
         if difficulty == 'easy':
             rows, cols = 10, 10
             num_words = 8
